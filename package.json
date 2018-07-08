@@ -5,7 +5,7 @@
   "repository": "https://github.com/atomicobject/lenses",
   "author": "Atomic Object",
   "license": "MIT",
-  "typeScriptVersion": "2.3",
+  "typeScriptVersion": "2.9.2",
   "scripts": {
     "prepublish": "tsc"
   },

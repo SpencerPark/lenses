@@ -1,6 +1,7 @@
-*.d.ts
-*.js
-*.js.map
-node_modules
-lib
+node_modules/
+src/**/*.d.ts
+src/**/*.js
+src/**/*.js.map
+lib/**/__tests__/**/*
 .DS_Store
+.idea/
