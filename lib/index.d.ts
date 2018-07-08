@@ -24,13 +24,13 @@ export interface Lens<T, V> {
 }
 /** Core prism shape. Used to construct Prisms and can be passed to higher-order Prism functions, such as comp */
 export interface IPrism<T, V> {
-    get(t: T): V | Prism.NONE;
+    get(t: T): V | Prism.None;
     set(t: T, value: V): T;
 }
 /** An object which can be used for getting and copy-and-updating potentially-undefined substructure of objects. Like lens, but used for optional things. */
 export interface Prism<T, V> {
-    (t: T): V | Prism.NONE;
-    get(t: T): V | Prism.NONE;
+    (t: T): V | Prism.None;
+    get(t: T): V | Prism.None;
     set(v: V): (t: T) => T;
     set(t: T, v: V): T;
     update(fn: Prism.Updater<V>): (t: T) => T;
@@ -45,12 +45,13 @@ export declare type Isomorphism<T, V> = {
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export declare namespace Prism {
     class None {
+        static readonly INSTANCE: None;
+        private constructor();
     }
-    type NONE = None;
-    const NONE: NONE;
+    const NONE: None;
     const isNone: <V>(v: None | V) => v is None;
     const isNotNone: <V>(v: None | V) => v is V;
-    type Updater<V> = (v: V | Prism.NONE) => V | Prism.NONE;
+    type Updater<V> = (v: V | None) => V | None;
     function of<T, V>(spec: IPrism<T, V>): Prism<T, V>;
     type Prismish<T, U> = IPrism<T, U> | ILens<T, U>;
     function comp<T, U, V>(l1: Prismish<T, U>, l2: Prismish<U, V>): Prism<T, V>;

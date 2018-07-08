@@ -34,14 +34,14 @@ export interface Lens<T,V> {
 
 /** Core prism shape. Used to construct Prisms and can be passed to higher-order Prism functions, such as comp */
 export interface IPrism<T, V> {
-  get(t: T): V | Prism.NONE;
+  get(t: T): V | Prism.None;
   set(t: T, value: V): T
 }
 
 /** An object which can be used for getting and copy-and-updating potentially-undefined substructure of objects. Like lens, but used for optional things. */
 export interface Prism<T,V> {
-  (t:T): V | Prism.NONE;
-  get(t:T): V | Prism.NONE;
+  (t:T): V | Prism.None;
+  get(t:T): V | Prism.None;
 
   set(v:V): (t:T) => T;
   set(t:T, v:V): T;
@@ -58,16 +58,19 @@ export type Isomorphism<T, V> = {
   from: (v: V) => T;
 };
 
+
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export namespace Prism {
-  class None {}
-  export type NONE = None;
-  export const NONE: NONE = new None();
+  export class None {
+    static readonly INSTANCE = new None();
+    private constructor() {}
+  }
+  export const NONE = None.INSTANCE;
 
-  export const isNone = <V>(v: V | NONE): v is NONE => v === NONE;
-  export const isNotNone = <V>(v: V | NONE): v is V => v !== NONE;
+  export const isNone = <V>(v: V | None): v is None => v === NONE;
+  export const isNotNone = <V>(v: V | None): v is V => v !== NONE;
 
-  export type Updater<V> = (v: V | Prism.NONE) => V | Prism.NONE;
+  export type Updater<V> = (v: V | None) => V | None;
 
   export function of<T, V>(spec: IPrism<T, V>): Prism<T, V> {
     const func = (o => spec.get(o)) as Prism<T, V>;
