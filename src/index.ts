@@ -60,9 +60,9 @@ export type Isomorphism<T, V> = {
 
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export namespace Prism {
-  class _None {}
-  export type NONE = _None;
-  export const NONE: NONE = new _None();
+  class None {}
+  export type NONE = None;
+  export const NONE: NONE = new None();
 
   export const isNone = <V>(v: V | NONE): v is NONE => v === NONE;
   export const isNotNone = <V>(v: V | NONE): v is V => v !== NONE;
