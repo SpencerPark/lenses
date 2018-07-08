@@ -209,7 +209,7 @@ describe("Prism", () => {
     return Prism.of<T[], T>({
       get(a) {
         const i = index(a, n);
-        return i !== undefined ? a[i] : Prism.NONE;
+        return i !== undefined ? a[i] : Prism.None;
       },
       set(a, v) {
         const i = index(a, n);
@@ -237,7 +237,7 @@ describe("Prism", () => {
     it("short circuits on undefined", () => {
       let a = ["a"];
       let index1 = arrayIndex<string>(1);
-      expect(index1.get(a)).toBe(Prism.NONE);
+      expect(index1.get(a)).toBe(Prism.None);
 
       let a2 = index1.set(a, "b");
       expect(a2).toEqual(["a"]);
@@ -270,8 +270,8 @@ describe("Prism", () => {
       });
 
       const empty = { array: [] };
-      expect(composed(empty)).toBe(Prism.NONE);
-      expect(composed.get(empty)).toBe(Prism.NONE);
+      expect(composed(empty)).toBe(Prism.None);
+      expect(composed.get(empty)).toBe(Prism.None);
       expect(composed.set(empty, 1)).toEqual({ array: [] });
     });
 
@@ -291,8 +291,8 @@ describe("Prism", () => {
         expect(composed.set(arr, 10)).toEqual([{ prop: 10 }]);
 
         const empty: Inner[] = [];
-        expect(composed(empty)).toBe(Prism.NONE);
-        expect(composed.get(empty)).toBe(Prism.NONE);
+        expect(composed(empty)).toBe(Prism.None);
+        expect(composed.get(empty)).toBe(Prism.None);
         expect(composed.set(empty, 1)).toEqual([]);
     });
   });

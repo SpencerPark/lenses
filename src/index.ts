@@ -62,13 +62,11 @@ export type Isomorphism<T, V> = {
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export namespace Prism {
   export class None {
-    static readonly INSTANCE = new None();
     private constructor() {}
   }
-  export const NONE = None.INSTANCE;
 
-  export const isNone = <V>(v: V | None): v is None => v === NONE;
-  export const isNotNone = <V>(v: V | None): v is V => v !== NONE;
+  export const isNone = <V>(v: V | None): v is None => v === None;
+  export const isNotNone = <V>(v: V | None): v is V => v !== None;
 
   export type Updater<V> = (v: V | None) => V | None;
 
@@ -118,7 +116,7 @@ export namespace Prism {
     let performComposedSet: any;
     return Prism.of<T, V>({
       get: t =>
-        prisms.reduce((prevT, p) => isNone(prevT) ? Prism.NONE : p.get(prevT), t),
+        prisms.reduce((prevT, p) => isNone(prevT) ? Prism.None : p.get(prevT), t),
       set: (t, v) => {
         if (performComposedSet === undefined) {
           performComposedSet = makeComposedSetter();

@@ -13,7 +13,7 @@ export namespace Arrays {
     return Prism.of<T[], T>({
       get(a) {
         const i = index(a, n);
-        return i !== undefined ? a[i] : Prism.NONE;
+        return i !== undefined ? a[i] : Prism.None;
       },
       set(a, v) {
         const i = index(a, n);

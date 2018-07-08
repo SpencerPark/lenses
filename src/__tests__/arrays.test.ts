@@ -9,11 +9,11 @@ describe('Arrays', () => {
     it('is a prism for the specified index', () => {
       const a = [1,2,3];
 
-      expect(Arrays.index<number>(-1)(a)).toBe(Prism.NONE);
+      expect(Arrays.index<number>(-1)(a)).toBe(Prism.None);
       expect(Arrays.index<number>(0)(a)).toBe(1);
       expect(Arrays.index<number>(1)(a)).toBe(2);
       expect(Arrays.index<number>(2)(a)).toBe(3);
-      expect(Arrays.index<number>(3)(a)).toBe(Prism.NONE);
+      expect(Arrays.index<number>(3)(a)).toBe(Prism.None);
 
       const b = Arrays.index<number>(2).set(a,5);
       const c = Arrays.index<number>(3).set(a,9999);
