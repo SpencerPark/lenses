@@ -18,7 +18,7 @@
     "jsverify": "^0.8.2",
     "lodash": "^4.17.4",
     "ts-jest": "^20.0.11",
-    "typescript": "^2.4.2"
+    "typescript": "2.9.2"
   },
   "directories": {
     "lib": "./lib"

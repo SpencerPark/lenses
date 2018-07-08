@@ -12,8 +12,8 @@ export namespace Arrays {
 
     return Prism.of<T[], T>({
       get(a) {
-        const i = index(a, n)
-        return i !== undefined ? a[i] : undefined;
+        const i = index(a, n);
+        return i !== undefined ? a[i] : Prism.NONE;
       },
       set(a, v) {
         const i = index(a, n);
@@ -34,7 +34,7 @@ export namespace Arrays {
       ...add,
       ...a.slice(i + del, a.length)
     ]
-  };
+  }
 
   /** Like Array#pop but returns a copy */
   export function pop<T>(a: T[]): T[] {

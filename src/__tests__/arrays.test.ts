@@ -1,6 +1,7 @@
 import {Arrays} from '../arrays';
 import * as jsv from 'jsverify';
 import {isEqual} from 'lodash';
+import {Prism} from '../index';
 
 
 describe('Arrays', () => {
@@ -8,11 +9,11 @@ describe('Arrays', () => {
     it('is a prism for the specified index', () => {
       const a = [1,2,3];
 
-      expect(Arrays.index<number>(-1)(a)).toBe(undefined);
+      expect(Arrays.index<number>(-1)(a)).toBe(Prism.NONE);
       expect(Arrays.index<number>(0)(a)).toBe(1);
       expect(Arrays.index<number>(1)(a)).toBe(2);
       expect(Arrays.index<number>(2)(a)).toBe(3);
-      expect(Arrays.index<number>(3)(a)).toBe(undefined);
+      expect(Arrays.index<number>(3)(a)).toBe(Prism.NONE);
 
       const b = Arrays.index<number>(2).set(a,5);
       const c = Arrays.index<number>(3).set(a,9999);
@@ -38,7 +39,7 @@ describe('Arrays', () => {
     });
 
     it('really is like Array#splice', () => {
-      var prop = jsv.forall('array nat', 'nat', 'nat', 'array nat',
+      const prop = jsv.forall('array nat', 'nat', 'nat', 'array nat',
         (a: number[], i: number, del: number, add: number[]) => {
           const nativeResult = a.slice();
           nativeResult.splice(i, del, ...add);
@@ -96,4 +97,4 @@ describe('Arrays', () => {
       expect(shift([])).toEqual([])
     })
   });
-})
+});

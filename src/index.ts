@@ -34,20 +34,20 @@ export interface Lens<T,V> {
 
 /** Core prism shape. Used to construct Prisms and can be passed to higher-order Prism functions, such as comp */
 export interface IPrism<T, V> {
-  get(t: T): V | undefined;
-  set(a: T, value: V): T
+  get(t: T): V | Prism.NONE;
+  set(t: T, value: V): T
 }
 
 /** An object which can be used for getting and copy-and-updating potentially-undefined substructure of objects. Like lens, but used for optional things. */
 export interface Prism<T,V> {
-  (t:T): V | undefined;
-  get(t:T): V | undefined;
+  (t:T): V | Prism.NONE;
+  get(t:T): V | Prism.NONE;
 
   set(v:V): (t:T) => T;
   set(t:T, v:V): T;
 
-  update(fn: (v:V | undefined) => V | undefined): (t:T) => T;
-  update(t:T, fn: (v:V | undefined) => V | undefined): T;
+  update(fn: Prism.Updater<V>): (t:T) => T;
+  update(t:T, fn: Prism.Updater<V>): T;
 
   comp<V2>(l: Prism.Prismish<V, V2>): Prism<T, V2>;
 }
@@ -60,60 +60,67 @@ export type Isomorphism<T, V> = {
 
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export namespace Prism {
-  export function of<T,V>(spec: IPrism<T,V>): Prism<T,V> {
-    var func = <Prism<T,V>>function (o: T) {
-      return spec.get(o);
-    };
+  class _None {}
+  export type NONE = _None;
+  export const NONE: NONE = new _None();
 
-    const set = function(tOrV: T|V, v?: V) {
-      if (arguments.length === 1) {
-        return (t:T) => spec.set(t, <V>tOrV);
-      } else {
-        return spec.set(<T>tOrV, v!);
-      }
+  export const isNone = <V>(v: V | NONE): v is NONE => v === NONE;
+  export const isNotNone = <V>(v: V | NONE): v is V => v !== NONE;
+
+  export type Updater<V> = (v: V | Prism.NONE) => V | Prism.NONE;
+
+  export function of<T, V>(spec: IPrism<T, V>): Prism<T, V> {
+    const func = (o => spec.get(o)) as Prism<T, V>;
+
+    function set(v: V): (t: T) => T;
+    function set(t: T, v: V): T;
+    function set(tOrV: T | V, v?: V) {
+      if (arguments.length === 1)
+        return (t:T) => spec.set(t, tOrV as V);
+
+      return spec.set(tOrV as T, v as V);
     }
 
-    const update = (tOrFn: T|Function, f?: Function) => {
-      if (f === undefined) {
-        return (t:T) => func.update(t, <any>tOrFn);
-      } else {
-        const t = <T>tOrFn;
-        const v = spec.get(t);
-        if (v === undefined) {
-          return t;
-        } else {
-          return spec.set(t, <V>f(v));
-        }
-      }
+    function update(fn: Prism.Updater<V>): (t:T) => T;
+    function update(t:T, fn: Prism.Updater<V>): T;
+    function update(tOrFn: T | Prism.Updater<V>, fn?: Prism.Updater<V>) {
+      if (arguments.length === 1)
+        return (t:T) => func.update(t, tOrFn as Prism.Updater<V>);
+
+      const t = tOrFn as T;
+      let v = spec.get(t);
+      if (isNone(v))
+        return t;
+
+      v = (fn as Prism.Updater<V>)(v);
+      return isNotNone(v) ? spec.set(t, v) : t;
     }
 
-    const comp = (...prisms: any[]) => 
-      (Prism.comp as any)(func, ...prisms);
+    const comp = Prism.comp.bind(undefined, func);
 
-    (func as any).get = spec.get;
-    (func as any).set = set;
-    (func as any).update = update;
-    (func as any).comp = comp;
-    return <Prism<T,V>>func;
+    func.get = spec.get;
+    func.set = set;
+    func.update = update;
+    func.comp = comp;
+    return func;
   }
 
-  export type Prismish<T,U> = ILens<T,U> | IPrism<T,U>
+  export type Prismish<T, U> = IPrism<T, U> | ILens<T, U>;
 
   export function comp<T, U, V>(l1: Prismish<T, U>, l2: Prismish<U, V>): Prism<T, V>;
   export function comp<T, U1, U2, V>(l1: Prismish<T, U1>, l2: Prismish<U1, U2>, l3: IPrism<U2, V>): Prism<T, V>;
   export function comp<T, U1, U2, U3, V>(l1: Prismish<T, U1>, l2: Prismish<U1, U2>, l3: IPrism<U2, U3>, l4: Prismish<U3, V>): Prism<T, V>;
   export function comp<T, U1, U2, U3, U4, V>(l1: Prismish<T, U1>, l2: Prismish<U1, U2>, l3: IPrism<U2, U3>, l4: Prismish<U3, U4>, l5: Prismish<U4, V>): Prism<T, V>;
-  export function comp(...prisms: Prismish<any, any>[]): Prism<any, any> {
+  export function comp<T, V>(...prisms: Prismish<any, any>[]): Prism<T, V> {
     let performComposedSet: any;
-    return Prism.of({
-      get: (o: any) =>
-        prisms.reduce((o, l) => o === undefined ? o : l.get(o), o),
-      
-      set: (o: any, v: any) => {
+    return Prism.of<T, V>({
+      get: t =>
+        prisms.reduce((prevT, p) => isNone(prevT) ? Prism.NONE : p.get(prevT), t),
+      set: (t, v) => {
         if (performComposedSet === undefined) {
           performComposedSet = makeComposedSetter();
         }
-        return performComposedSet(o, v, prisms, 0);
+        return performComposedSet(t, v, prisms, 0);
       }
     });
   }
@@ -173,18 +180,18 @@ export interface SafeUpdate {
 
 /** Factory to create monomorphic composed setters */
 function makeComposedSetter() {
-  const performComposedSet = (o: any, v: any, lenses: ILens<any, any>[], index: number) => {
-    if (index == lenses.length - 1) {
-      return lenses[index].set(o, v);
+  const performComposedSet = (o: any, v: any, prisms: Prism.Prismish<any, any>[], index: number): any => {
+    if (index == prisms.length - 1) {
+      return prisms[index].set(o, v);
     } else {
-      const inner = lenses[index].get(o);
-      if (inner) {
-        return lenses[index].set(o, performComposedSet(inner, v, lenses, index + 1));
+      const inner = prisms[index].get(o);
+      if (Prism.isNotNone(inner)) {
+        return prisms[index].set(o, performComposedSet(inner, v, prisms, index + 1));
       } else {
         return o;
       }
     }
-  }
+  };
   return performComposedSet;
 }
 
