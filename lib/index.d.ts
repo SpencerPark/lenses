@@ -44,12 +44,12 @@ export declare type Isomorphism<T, V> = {
 };
 /** Core module for creating and using prisms, which are get/set proxies that gracefully handle undefined. */
 export declare namespace Prism {
-    class _None {
+    class None {
     }
-    type NONE = _None;
+    type NONE = None;
     const NONE: NONE;
-    const isNone: <V>(v: _None | V) => v is _None;
-    const isNotNone: <V>(v: _None | V) => v is V;
+    const isNone: <V>(v: None | V) => v is None;
+    const isNotNone: <V>(v: None | V) => v is V;
     type Updater<V> = (v: V | Prism.NONE) => V | Prism.NONE;
     function of<T, V>(spec: IPrism<T, V>): Prism<T, V>;
     type Prismish<T, U> = IPrism<T, U> | ILens<T, U>;
